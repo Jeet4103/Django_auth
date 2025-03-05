@@ -1,0 +1,75 @@
+@base_url = http://127.0.0.1:8000
+
+### Obtain Auth Token
+# @name get_token
+POST {{base_url}}/api-token-auth/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "admin123@gmail.com",
+    "password": "password"
+}
+
+### Store token for authentication
+@auth_token = {{get_token.response.body.token}}
+
+### Test Authentication Required View
+GET {{base_url}}/json/ HTTP/1.1
+Content-Type: application/json
+Authorization: Token {{auth_token}}
+
+### Rest Auth Registration
+POST {{base_url}}/dj-rest-auth/registration/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "email": "jeet123@gmail.com",
+    "username": "jeet123",
+    "password1": "password1",
+    "password2": "password1"
+}
+
+### Rest Auth Login
+# @name rest_auth_login
+POST {{base_url}}/dj-rest-auth/login/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "email": "jeet123@gmail.com",
+    "password": "password1"
+}
+
+### Store rest auth token
+@rest_auth_token = {{rest_auth_login.response.body.key}}
+
+### Test Rest Auth Authentication
+GET {{base_url}}/json/ HTTP/1.1
+Content-Type: application/json
+Authorization: Token {{rest_auth_token}}
+
+### Obtain JWT Token Pair
+# @name jwt
+POST {{base_url}}/api/token/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "jeet123",
+    "password": "password1"
+}
+
+### Store JWT tokens
+@jwt_access = {{jwt.response.body.access}}
+@jwt_refresh = {{jwt.response.body.refresh}}
+
+### Refresh JWT Token
+POST {{base_url}}/api/token/refresh/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "refresh": "{{jwt_refresh}}"
+}
+
+### Test JWT Authentication
+GET {{base_url}}/json/ HTTP/1.1
+Content-Type: application/json 
+Authorization: Bearer {{jwt_access}}
